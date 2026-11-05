@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patti Heritage & Artisan Connect</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN for Reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased" x-data="tourismApp()">
+
+    <!-- Header -->
+    <header class="bg-amber-900 text-amber-50 shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-serif font-bold tracking-wide">Patti Heritage & Artisan Connect</h1>
+                <p class="text-amber-200 text-sm mt-1">Discover authentic local culture, hidden historical sites, and master craftspeople.</p>
+            </div>
+            <nav class="mt-4 md:mt-0 flex gap-4">
+                <button @click="currentTab = 'explore'" :class="currentTab === 'explore' ? 'bg-amber-800 text-white' : 'text-amber-200 hover:text-white'" class="px-4 py-2 rounded-lg font-medium transition">Explore Places</button>
+                <button @click="currentTab = 'planner'" :class="currentTab === 'planner' ? 'bg-amber-800 text-white' : 'text-amber-200 hover:text-white'" class="px-4 py-2 rounded-lg font-medium transition">Itinerary Planner</button>
+                <button @click="currentTab = 'artisans'" :class="currentTab === 'artisans' ? 'bg-amber-800 text-white' : 'text-amber-200 hover:text-white'" class="px-4 py-2 rounded-lg font-medium transition">Meet Artisans</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+
+        <!-- TAB 1: EXPLORE PLACES -->
+        <div x-show="currentTab === 'explore'" class="space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-stone-200">
+                <input type="text" x-model="searchQuery" placeholder="Search by name, craft, or history..." class="w-full md:w-1/3 px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-700">
+                
+                <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+                    <button @click="selectedCategory = 'all'" :class="selectedCategory === 'all' ? 'bg-amber-900 text-white' : 'bg-stone-100 text-stone-700'" class="px-3 py-1.5 rounded-lg text-sm font-medium">All</button>
+                    <button @click="selectedCategory = 'Heritage'" :class="selectedCategory === 'Heritage' ? 'bg-amber-900 text-white' : 'bg-stone-100 text-stone-700'" class="px-3 py-1.5 rounded-lg text-sm font-medium">Heritage</button>
+                    <button @click="selectedCategory = 'Artisan'" :class="selectedCategory === 'Artisan' ? 'bg-amber-900 text-white' : 'bg-stone-100 text-stone-700'" class="px-3 py-1.5 rounded-lg text-sm font-medium">Artisans</button>
+                    <button @click="selectedCategory = 'Food'" :class="selectedCategory === 'Food' ? 'bg-amber-900 text-white' : 'bg-stone-100 text-stone-700'" class="px-3 py-1.5 rounded-lg text-sm font-medium">Traditional Food</button>
+                </div>
+            </div>
+
+            <!-- Grid of Places -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <template x-for="item in filteredPlaces" :key="item.id">
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition">
+                        <div>
+                            <div class="h-48 bg-stone-200 relative">
+                                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover">
+                                <span class="absolute top-3 right-3 bg-amber-900 text-amber-50 text-xs px-2.5 py-1 rounded-full font-semibold" x-text="item.category"></span>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="text-xl font-serif font-bold text-stone-900" x-text="item.name"></h3>
+                                <p class="text-stone-500 text-sm mt-1" x-text="item.location"></p>
+                                <p class="text-stone-700 text-sm mt-3" x-text="item.description"></p>
+                            </div>
+                        </div>
+                        <div class="p-5 pt-0 flex justify-between items-center border-t border-stone-100 mt-4">
+                            <span class="text-xs text-stone-500 font-medium" x-text="item.timeNeeded"></span>
+                            <button @click="openDetail(item)" class="text-amber-900 font-semibold text-sm hover:underline">View Details &rarr;</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- TAB 2: SMART ITINERARY PLANNER -->
+        <div x-show="currentTab === 'planner'" class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-stone-200 max-w-3xl mx-auto space-y-6">
+            <div>
+                <h2 class="text-2xl font-serif font-bold text-stone-900">Custom Itinerary Generator</h2>
+                <p class="text-stone-600 text-sm mt-1">Tell us your preferences, and our system will build a tailored exploration plan for your visit.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">How much time do you have?</label>
+                    <select x-model="plannerTime" class="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-700">
+                        <option value="half">Half Day (3-4 hours)</option>
+                        <option value="full">Full Day (6-8 hours)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">What interests you most?</label>
+                    <select x-model="plannerInterest" class="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-700">
+                        <option value="all">A Balanced Mix (History, Crafts & Food)</option>
+                        <option value="Heritage">History & Architecture</option>
+                        <option value="Artisan">Local Crafts & Artisan Workshops</option>
+                        <option value="Food">Regional Culinary Experiences</option>
+                    </select>
+                </div>
+
+                <button @click="generateItinerary" class="w-full bg-amber-900 text-white py-3 rounded-lg font-semibold hover:bg-amber-800 transition">
+                    Generate My Itinerary
+                </button>
+            </div>
+
+            <!-- Itinerary Results -->
+            <div x-show="itineraryGenerated" class="mt-8 pt-6 border-t border-stone-200 space-y-4">
+                <h3 class="text-xl font-serif font-bold text-stone-900">Your Recommended Route</h3>
+                <div class="space-y-3">
+                    <template x-for="(stop, index) in generatedStops" :key="index">
+                        <div class="flex gap-4 p-4 bg-stone-50 rounded-lg border border-stone-200">
+                            <div class="flex-shrink-0 w-8 h-8 bg-amber-900 text-white rounded-full flex items-center justify-center font-bold text-sm" x-text="index + 1"></div>
+                            <div>
+                                <h4 class="font-bold text-stone-900" x-text="stop.name"></h4>
+                                <p class="text-xs text-amber-800 font-medium" x-text="stop.category + ' • ' + stop.timeNeeded"></p>
+                                <p class="text-stone-600 text-sm mt-1" x-text="stop.description"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: MEET ARTISANS DIRECT CONNECT -->
+        <div x-show="currentTab === 'artisans'" class="space-y-6">
+            <div class="bg-amber-100 border border-amber-300 p-6 rounded-xl">
+                <h2 class="text-2xl font-serif font-bold text-amber-900">Direct Artisan & Host Connection</h2>
+                <p class="text-amber-800 text-sm mt-1">Support local heritage keepers directly. Schedule a workshop visit, request custom crafts, or ask a question.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <template x-for="artisan in artisanList" :key="artisan.id">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-4 mb-4">
+                                <img :src="artisan.image" :alt="artisan.name" class="w-16 h-16 rounded-full object-cover border-2 border-amber-900">
+                                <div>
+                                    <h3 class="text-lg font-bold text-stone-900" x-text="artisan.name"></h3>
+                                    <p class="text-xs text-amber-800 font-semibold uppercase tracking-wider" x-text="artisan.craft"></p>
+                                    <p class="text-stone-500 text-xs mt-0.5" x-text="artisan.location"></p>
+                                </div>
+                            </div>
+                            <p class="text-stone-600 text-sm" x-text="artisan.bio"></p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-stone-100 flex justify-between items-center">
+                            <span class="text-xs bg-stone-100 text-stone-700 px-2.5 py-1 rounded-md" x-text="artisan.availability"></span>
+                            <button @click="openContactModal(artisan)" class="bg-amber-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-amber-800 transition">
+                                Connect / Book Visit
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Detail Modal -->
+    <div x-show="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div @click.outside="showModal = false" class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 relative">
+            <button @click="showModal = false" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 font-bold text-lg">&times;</button>
+            <template x-if="activeItem">
+                <div>
+                    <img :src="activeItem.image" class="w-full h-56 object-cover rounded-xl mb-4">
+                    <span class="text-xs bg-amber-100 text-amber-900 font-semibold px-2.5 py-1 rounded-full" x-text="activeItem.category"></span>
+                    <h3 class="text-2xl font-serif font-bold text-stone-900 mt-2" x-text="activeItem.name"></h3>
+                    <p class="text-stone-500 text-sm" x-text="activeItem.location"></p>
+                    <p class="text-stone-700 text-sm mt-3" x-text="activeItem.description"></p>
+                    <div class="mt-4 p-4 bg-stone-50 rounded-lg border border-stone-200">
+                        <h4 class="text-xs font-bold uppercase text-stone-500">Visitor Tip</h4>
+                        <p class="text-stone-700 text-sm mt-1" x-text="activeItem.tip"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Contact / Booking Modal -->
+    <div x-show="showContactModal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div @click.outside="showContactModal = false" class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 relative">
+            <button @click="showContactModal = false" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 font-bold text-lg">&times;</button>
+            <template x-if="activeArtisan">
+                <div>
+                    <h3 class="text-xl font-serif font-bold text-stone-900">Connect with <span x-text="activeArtisan.name"></span></h3>
+                    <p class="text-stone-600 text-sm mt-1">Send a direct inquiry for a workshop visit or experience.</p>
+                    
+                    <form @submit.prevent="submitInquiry" class="mt-4 space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-stone-700 mb-1">Your Name</label>
+                            <input type="text" required class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-700">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-stone-700 mb-1">Preferred Date & Time</label>
+                            <input type="date" required class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-700">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-stone-700 mb-1">Message / Request</label>
+                            <textarea rows="3" placeholder="I'd love to learn about your craft..." class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-700"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-amber-900 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-amber-800 transition">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </template>
+            <template x-if="inquirySent">
+                <div class="text-center py-6 space-y-3">
+                    <div class="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center mx-auto text-xl font-bold">✓</div>
+                    <h4 class="text-lg font-bold text-stone-900">Inquiry Sent Successfully!</h4>
+                    <p class="text-stone-600 text-sm">The artisan will review your request and reach out directly.</p>
+                    <button @click="showContactModal = false; inquirySent = false" class="bg-stone-900 text-white px-4 py-2 rounded-lg text-sm font-semibold">Close</button>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        function tourismApp() {
+            return {
+                currentTab: 'explore',
+                searchQuery: '',
+                selectedCategory: 'all',
+                showModal: false,
+                showContactModal: false,
+                activeItem: null,
+                activeArtisan: null,
+                inquirySent: false,
+                
+                plannerTime: 'half',
+                plannerInterest: 'all',
+                itineraryGenerated: false,
+                generatedStops: [],
+
+                places: [
+                    {
+                        id: 1,
+                        name: "Ancient Baoli & Stepwell",
+                        category: "Heritage",
+                        location: "Old Town Sector 3",
+                        description: "A 18th-century architectural marvel built to harvest rainwater, featuring intricate stone carvings and quiet meditative chambers.",
+                        timeNeeded: "1 hour",
+                        tip: "Visit during morning hours for the best lighting and photography.",
+                        image: "https://images.unsplash.com/photo-1590053424264-b1522883f47c?auto=format&fit=crop&q=80&w=600"
+                    },
+                    {
+                        id: 2,
+                        name: "Master Ramlal's Potter Workshop",
+                        category: "Artisan",
+                        location: "Kumbhar Gali",
+                        description: "Experience traditional wheel pottery passed down through four generations. Try your hand at shaping local clay.",
+                        timeNeeded: "1.5 hours",
+                        tip: "Call ahead if you wish to ship fragile handmade souvenirs home.",
+                        image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=600"
+                    },
+                    {
+                        id: 3,
+                        name: "Heritage Sweets & Tea House",
+                        category: "Food",
+                        location: "Main Bazaar Chowk",
+                        description: "Serving authentic wood-fired sweets and traditional spiced tea using heirloom recipes dating back over 80 years.",
+                        timeNeeded: "45 mins",
+                        tip: "Try their signature jaggery-infused milk cake.",
+                        image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&q=80&w=600"
+                    },
+                    {
+                        id: 4,
+                        name: "Sufi Heritage Shrine",
+                        category: "Heritage",
+                        location: "East District Gate",
+                        description: "A peaceful sanctuary known for its tranquil courtyard, centuries-old marble lattice work, and evening acoustic gatherings.",
+                        timeNeeded: "1 hour",
+                        tip: "Visitors are requested to dress modestly and keep heads covered.",
+                        image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=600"
+                    },
+                    {
+                        id: 5,
+                        name: "Weavers' Cooperative Guild",
+                        category: "Artisan",
+                        location: "Handloom Lane",
+                        description: "Witness master weavers creating traditional handloom fabrics on vintage wooden looms using natural plant dyes.",
+                        timeNeeded: "2 hours",
+                        tip: "Direct purchases here directly fund the artisan families.",
+                        image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=600"
+                    }
+                ],
+
+                artisanList: [
+                    {
+                        id: 1,
+                        name: "Rahul Singh",
+                        craft: "Traditional Pottery",
+                        location: "Kumbhar Gali",
+                        bio: "Practicing pottery for over 45 years. Passionate about teaching children and travelers the ancient art of clay spinning.",
+                        availability: "Mon - Sat (10 AM - 4 PM)",
+                        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300"
+                    },
+                    {
+                        id: 2,
+                        name: "Anubhav Raj",
+                        craft: "Handloom Weaving & Natural Dyeing",
+                        location: "Handloom Lane",
+                        bio: "Leader of the local women weavers guild, specializing in organic cotton fabrics and botanical dye extractions.",
+                        availability: "Tue - Sun (9 AM - 5 PM)",
+                        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"
+                    }
+                ],
+
+                get filteredPlaces() {
+                    return this.places.filter(item => {
+                        const matchesCategory = this.selectedCategory === 'all' || item.category === this.selectedCategory;
+                        const matchesSearch = item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+                                              item.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                                              item.location.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchesCategory && matchesSearch;
+                    });
+                },
+
+                openDetail(item) {
+                    this.activeItem = item;
+                    this.showModal = true;
+                },
+
+                openContactModal(artisan) {
+                    this.activeArtisan = artisan;
+                    this.inquirySent = false;
+                    this.showContactModal = true;
+                },
+
+                submitInquiry() {
+                    this.inquirySent = true;
+                },
+
+                generateItinerary() {
+                    let pool = [...this.places];
+                    if (this.plannerInterest !== 'all') {
+                        pool = pool.filter(p => p.category === this.plannerInterest);
+                        if (pool.length === 0) pool = [...this.places]; // fallback
+                    }
+                    
+                    const count = this.plannerTime === 'half' ? 2 : 4;
+                    this.generatedStops = pool.slice(0, count);
+                    this.itineraryGenerated = true;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
